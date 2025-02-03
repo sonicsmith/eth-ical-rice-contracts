@@ -47,7 +47,7 @@ contract ETHicalRice is IETHicalRice {
     // Function to set a farm plot time by index
     function setFarmPlot(address user, uint256 index, uint8 plotType) public onlyOwner {
         if (index >= farmPlotTimes[user].length) createPlayerFarmPlots(user);
-        FarmPlot memory plot = getFarmPlot(user, index);
+        FarmPlot memory plot = getFarmPlots(user)[index];
         if (plot.time != 0) revert FarmPlotAlreadySet();
         farmPlotTimes[user][index] = block.timestamp;
         farmPlotTypes[user][index] = plotType;
@@ -67,13 +67,16 @@ contract ETHicalRice is IETHicalRice {
         return campaigns[nextCampaignIndex];
     }
 
-    function getFarmPlot(address user, uint256 index) public view returns (FarmPlot memory) {
-        uint256 time = farmPlotTimes[user][index];
-        if (time == 0) {
-            return FarmPlot(0, 0);
+    function getFarmPlots(address user) public view returns (FarmPlot[] memory) {
+        FarmPlot[] memory plots = new FarmPlot[](9);
+        if (farmPlotTimes[user].length == 0) {
+            return plots;
         }
-        uint8 plotType = farmPlotTypes[user][index];
-
-        return FarmPlot(time, plotType);
+        for (uint256 i = 0; i < 9; i++) {
+            uint256 time = farmPlotTimes[user][i];
+            uint8 plotType = farmPlotTypes[user][i];
+            plots[i] = FarmPlot(time, plotType);
+        }
+        return plots;
     }
 }
