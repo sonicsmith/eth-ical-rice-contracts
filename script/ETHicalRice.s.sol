@@ -2,17 +2,17 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
-import {Counter} from "../src/Counter.sol";
+import {ETHicalRice} from "../src/ETHicalRice.sol";
 
-contract CounterScript is Script {
-    Counter public counter;
+contract ETHicalRiceScript is Script {
+    ETHicalRice public gameContract;
 
     function setUp() public {}
 
     function run() public {
         vm.startBroadcast();
 
-        counter = new Counter();
+        gameContract = new ETHicalRice();
 
         vm.stopBroadcast();
     }
