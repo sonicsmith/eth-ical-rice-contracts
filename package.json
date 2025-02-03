@@ -19,6 +19,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "forge test"
+    "test": "forge test",
+    "deploy": "forge script script/ETHicalRice.s.sol:ETHicalRiceScript --broadcast --verify -vvvv --rpc-url testnet"
   }
 }

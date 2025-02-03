@@ -7,10 +7,10 @@ import {ETHicalRice} from "../src/ETHicalRice.sol";
 contract ETHicalRiceScript is Script {
     ETHicalRice public gameContract;
 
-    function setUp() public {}
-
     function run() public {
-        vm.startBroadcast();
+        uint256 privateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
+
+        vm.startBroadcast(privateKey);
 
         gameContract = new ETHicalRice();
 
