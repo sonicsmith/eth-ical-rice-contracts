@@ -7,14 +7,19 @@ contract ETHicalRice {
 
     // Define errors
     error NotAuthorized();
-    error IndexOutOfBounds();
     error NoCampaignsAvailable();
+    error FarmPlotAlreadySet();
 
     // Define the Campaign struct
     struct Campaign {
         string name;
         string description;
         uint256 amount;
+    }
+
+    struct FarmPlot {
+        uint256 time;
+        uint8 plotType;
     }
 
     // Array of Campaigns
@@ -45,21 +50,35 @@ contract ETHicalRice {
         campaigns.push(Campaign(name, description, amount));
     }
 
-    // Function to set a farm plot time by index
-    function setFarmPlotTime(uint256 index, uint256 time) public onlyOwner {
-        if (index >= farmPlotTimes[msg.sender].length) revert IndexOutOfBounds();
-        farmPlotTimes[msg.sender][index] = time;
+    function createPlayerFarmPlots(address user) public onlyOwner {
+        for (uint256 i = 0; i < 9; i++) {
+            farmPlotTimes[user].push(0);
+            farmPlotTypes[user].push(0);
+        }
     }
 
-    // Function to set a farm plot type by index
-    function setFarmPlotType(uint256 index, uint8 plotType) public onlyOwner {
-        if (index >= farmPlotTypes[msg.sender].length) revert IndexOutOfBounds();
-        farmPlotTypes[msg.sender][index] = plotType;
+    // Function to set a farm plot time by index
+    function setFarmPlot(address user, uint256 index, uint8 plotType) public onlyOwner {
+        if (index >= farmPlotTimes[user].length) createPlayerFarmPlots(user);
+        FarmPlot memory plot = getFarmPlot(user, index);
+        if (plot.time != 0) revert FarmPlotAlreadySet();
+        farmPlotTimes[user][index] = block.timestamp;
+        farmPlotTypes[user][index] = plotType;
     }
 
     // Function to return the first campaign from the campaigns array
     function getNextCampaign() public view returns (Campaign memory) {
         if (campaigns.length == 0) revert NoCampaignsAvailable();
         return campaigns[0];
+    }
+
+    function getFarmPlot(address user, uint256 index) public view returns (FarmPlot memory) {
+        uint256 time = farmPlotTimes[user][index];
+        if (time == 0) {
+            return FarmPlot(0, 0);
+        }
+        uint8 plotType = farmPlotTypes[user][index];
+
+        return FarmPlot(time, plotType);
     }
 }
