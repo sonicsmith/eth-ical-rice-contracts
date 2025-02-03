@@ -1,29 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-contract ETHicalRice {
+import "./interfaces/IETHicalRice.sol";
+
+contract ETHicalRice is IETHicalRice {
     // Owner of the contract
     address public owner;
 
-    // Define errors
-    error NotAuthorized();
-    error NoCampaignsAvailable();
-    error FarmPlotAlreadySet();
-
-    // Define the Campaign struct
-    struct Campaign {
-        string name;
-        string description;
-        uint256 amount;
-    }
-
-    struct FarmPlot {
-        uint256 time;
-        uint8 plotType;
-    }
-
     // Array of Campaigns
     Campaign[] public campaigns;
+
+    uint256 public nextCampaignIndex = 0;
 
     // Mapping of addresses to an array of timestamps for farm plots
     mapping(address => uint256[]) public farmPlotTimes;
@@ -66,10 +53,18 @@ contract ETHicalRice {
         farmPlotTypes[user][index] = plotType;
     }
 
+    function chargeNextCampaign(uint256 amount) public onlyOwner {
+        if (nextCampaignIndex >= campaigns.length) revert NoCampaignsAvailable();
+        if (amount > campaigns[nextCampaignIndex].amount) {
+            nextCampaignIndex++;
+        }
+        campaigns[nextCampaignIndex].amount = amount;
+    }
+
     // Function to return the first campaign from the campaigns array
     function getNextCampaign() public view returns (Campaign memory) {
-        if (campaigns.length == 0) revert NoCampaignsAvailable();
-        return campaigns[0];
+        if (nextCampaignIndex >= campaigns.length) revert NoCampaignsAvailable();
+        return campaigns[nextCampaignIndex];
     }
 
     function getFarmPlot(address user, uint256 index) public view returns (FarmPlot memory) {
