@@ -38,14 +38,14 @@ contract ETHicalRice is IETHicalRice {
     }
 
     function createPlayerFarmPlots(address user) public onlyOwner {
-        for (uint256 i = 0; i < 9; i++) {
+        for (uint8 i = 0; i < 9; i++) {
             farmPlotTimes[user].push(0);
             farmPlotTypes[user].push(0);
         }
     }
 
     // Function to set a farm plot time by index
-    function setFarmPlot(address user, uint256 index, uint8 plotType) public onlyOwner {
+    function setFarmPlot(address user, uint8 index, uint8 plotType) public onlyOwner {
         if (index >= farmPlotTimes[user].length) createPlayerFarmPlots(user);
         FarmPlot memory plot = getFarmPlots(user)[index];
         if (plot.time != 0) revert FarmPlotAlreadySet();
@@ -59,6 +59,10 @@ contract ETHicalRice is IETHicalRice {
             nextCampaignIndex++;
         }
         campaigns[nextCampaignIndex].amount = amount;
+    }
+
+    function setRiceSupply(address user, uint256 amount) public onlyOwner {
+        riceSupply[user] = amount;
     }
 
     // Function to return the first campaign from the campaigns array
@@ -78,5 +82,9 @@ contract ETHicalRice is IETHicalRice {
             plots[i] = FarmPlot(time, plotType);
         }
         return plots;
+    }
+
+    function getRiceSupply(address user) public view returns (uint256) {
+        return riceSupply[user];
     }
 }
