@@ -9,7 +9,7 @@ testnet = "${TESTNET_RPC}"
 
 [etherscan]
 mainnet = { key = "${ETHERSCAN_API_KEY}", url = "${ETHERSCAN_API_URL}", chain = 660279 }
-testnet = { key = "${ETHERSCAN_API_KEY}", url = "${ETHERSCAN_API_URL}" chain = 37714555429 }
+testnet = { key = "${ETHERSCAN_API_KEY}", url = "${ETHERSCAN_API_URL}", chain = 37714555429 }
 unknown_chain = { key = "${ETHERSCAN_API_KEY}", url = "${ETHERSCAN_API_URL}" }
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
