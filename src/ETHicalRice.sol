@@ -26,6 +26,8 @@ contract ETHicalRice is IETHicalRice {
     // Mapping of addresses to their plant supply
     mapping(address => uint256) public riceSeedCount;
 
+    string scriptHash = "";
+
     // Constructor to set the owner of the contract
     constructor() {
         owner = msg.sender;
@@ -35,6 +37,10 @@ contract ETHicalRice is IETHicalRice {
     modifier onlyOwner() {
         if (msg.sender != owner) revert NotAuthorized();
         _;
+    }
+
+    function setScriptHash(string memory _scriptHash) external onlyOwner {
+        scriptHash = _scriptHash;
     }
 
     // Function to add a new campaign
@@ -102,5 +108,9 @@ contract ETHicalRice is IETHicalRice {
             plots[i] = FarmPlot(time, plantType);
         }
         return plots;
+    }
+
+    function getScriptHash() external view returns (string memory) {
+        return scriptHash;
     }
 }

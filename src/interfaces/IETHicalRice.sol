@@ -19,6 +19,8 @@ interface IETHicalRice {
         uint8 plantType;
     }
 
+    function setScriptHash(string memory _scriptHash) external;
+    function getScriptHash() external view returns (string memory);
     function addCampaign(string memory name, string memory description, uint256 amount) external;
     function plantAtFarmPlot(address user, uint8 index, uint8 plantType) external;
     function grantRiceSeed(address user, uint256 riceCost) external;
