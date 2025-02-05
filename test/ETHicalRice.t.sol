@@ -21,8 +21,8 @@ contract ETHicalRiceTest is Test {
         assertEq(gameContract.getFarmPlots(player).length, 9);
     }
 
-    function test_SetFarmPlotTime() public {
-        gameContract.setFarmPlot(player, 1, 1);
-        assertEq(gameContract.getFarmPlots(player)[1].plotType, 1);
+    function test_plantAtFarmPlotTime() public {
+        gameContract.plantAtFarmPlot(player, 1, 1);
+        assertEq(gameContract.getFarmPlots(player)[1].plantType, 1);
     }
 }

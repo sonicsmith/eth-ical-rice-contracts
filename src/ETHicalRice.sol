@@ -4,6 +4,11 @@ pragma solidity ^0.8.18;
 import "./interfaces/IETHicalRice.sol";
 
 contract ETHicalRice is IETHicalRice {
+    uint256 constant MINUTE = 60;
+    uint256 constant HOUR = 60 * MINUTE;
+    uint256 constant PLANT_GROWTH_TIME = HOUR;
+    uint256 constant RICE_GROWTH_TIME = 24 * HOUR;
+
     // Owner of the contract
     address public owner;
 
@@ -12,14 +17,14 @@ contract ETHicalRice is IETHicalRice {
 
     uint256 public nextCampaignIndex = 0;
 
-    // Mapping of addresses to an array of timestamps for farm plots
-    mapping(address => uint256[]) public farmPlotTimes;
+    // Mapping of addresses to an array of farm plots
+    mapping(address => uint256[9]) public farmPlotTimes;
+    mapping(address => uint8[9]) public farmPlotPlantTypes;
 
-    // Mapping of addresses to an array of types for farm plots
-    mapping(address => uint8[]) public farmPlotTypes;
-
-    // Mapping of addresses to their rice supply
-    mapping(address => uint256) public riceSupply;
+    // Mapping of addresses to their plant supply
+    mapping(address => uint8[3]) public plantSupply;
+    // Mapping of addresses to their plant supply
+    mapping(address => uint256) public riceSeedCount;
 
     // Constructor to set the owner of the contract
     constructor() {
@@ -33,58 +38,69 @@ contract ETHicalRice is IETHicalRice {
     }
 
     // Function to add a new campaign
-    function addCampaign(string memory name, string memory description, uint256 amount) public onlyOwner {
+    function addCampaign(string memory name, string memory description, uint256 amount) external onlyOwner {
         campaigns.push(Campaign(name, description, amount));
     }
 
-    function createPlayerFarmPlots(address user) public onlyOwner {
-        for (uint8 i = 0; i < 9; i++) {
-            farmPlotTimes[user].push(0);
-            farmPlotTypes[user].push(0);
-        }
-    }
-
     // Function to set a farm plot time by index
-    function setFarmPlot(address user, uint8 index, uint8 plotType) public onlyOwner {
-        if (index >= farmPlotTimes[user].length) createPlayerFarmPlots(user);
-        FarmPlot memory plot = getFarmPlots(user)[index];
-        if (plot.time != 0) revert FarmPlotAlreadySet();
-        farmPlotTimes[user][index] = block.timestamp;
-        farmPlotTypes[user][index] = plotType;
-    }
-
-    function chargeNextCampaign(uint256 amount) public onlyOwner {
-        if (nextCampaignIndex >= campaigns.length) revert NoCampaignsAvailable();
-        if (amount > campaigns[nextCampaignIndex].amount) {
-            nextCampaignIndex++;
+    function plantAtFarmPlot(address user, uint8 index, uint8 plantType) external onlyOwner {
+        uint256 time = farmPlotTimes[user][index];
+        if (time != 0) revert FarmPlotAlreadySet();
+        // If rice plant, remove seed
+        if (plantType == 2) {
+            if (riceSeedCount[user] == 0) revert NotEnoughRiceSeeds();
+            riceSeedCount[user]--;
         }
-        campaigns[nextCampaignIndex].amount = amount;
+        farmPlotTimes[user][index] = block.timestamp;
+        farmPlotPlantTypes[user][index] = plantType;
     }
 
-    function setRiceSupply(address user, uint256 amount) public onlyOwner {
-        riceSupply[user] = amount;
+    function grantRiceSeed(address user, uint256 riceCost) external onlyOwner {
+        if (nextCampaignIndex >= campaigns.length) revert NoCampaignsAvailable();
+        if (riceCost >= campaigns[nextCampaignIndex].amount) {
+            nextCampaignIndex++;
+            campaigns[nextCampaignIndex].amount = 0;
+        }
+        campaigns[nextCampaignIndex].amount -= riceCost;
+        riceSeedCount[user]++;
+    }
+
+    function harvestFarmPlot(address user, uint8 index) external onlyOwner {
+        uint256 time = farmPlotTimes[user][index];
+        uint8 plantType = farmPlotPlantTypes[user][index];
+        uint256 growTime = plantType == 0 ? PLANT_GROWTH_TIME : RICE_GROWTH_TIME;
+        if (time + growTime > block.timestamp) revert FarmPlotNotReady();
+        // Increase the plant count
+        plantSupply[user][plantType]++;
+        // Reset the farm plot
+        farmPlotTimes[user][index] = 0;
+        farmPlotPlantTypes[user][index] = 0;
+    }
+
+    function getPlantSupply(address user) external view returns (uint8[3] memory) {
+        uint8[3] memory plants;
+        for (uint8 i = 0; i < 3; i++) {
+            plants[i] = plantSupply[user][i];
+        }
+        return plants;
     }
 
     // Function to return the first campaign from the campaigns array
-    function getNextCampaign() public view returns (Campaign memory) {
+    function getNextCampaign() external view returns (Campaign memory) {
         if (nextCampaignIndex >= campaigns.length) revert NoCampaignsAvailable();
         return campaigns[nextCampaignIndex];
     }
 
-    function getFarmPlots(address user) public view returns (FarmPlot[] memory) {
+    function getFarmPlots(address user) external view returns (FarmPlot[] memory) {
         FarmPlot[] memory plots = new FarmPlot[](9);
         if (farmPlotTimes[user].length == 0) {
             return plots;
         }
         for (uint256 i = 0; i < 9; i++) {
             uint256 time = farmPlotTimes[user][i];
-            uint8 plotType = farmPlotTypes[user][i];
-            plots[i] = FarmPlot(time, plotType);
+            uint8 plantType = farmPlotPlantTypes[user][i];
+            plots[i] = FarmPlot(time, plantType);
         }
         return plots;
-    }
-
-    function getRiceSupply(address user) public view returns (uint256) {
-        return riceSupply[user];
     }
 }

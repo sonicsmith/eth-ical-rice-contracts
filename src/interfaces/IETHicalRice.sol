@@ -5,6 +5,8 @@ interface IETHicalRice {
     error NotAuthorized();
     error NoCampaignsAvailable();
     error FarmPlotAlreadySet();
+    error FarmPlotNotReady();
+    error NotEnoughRiceSeeds();
 
     struct Campaign {
         string name;
@@ -14,20 +16,14 @@ interface IETHicalRice {
 
     struct FarmPlot {
         uint256 time;
-        uint8 plotType;
+        uint8 plantType;
     }
 
     function addCampaign(string memory name, string memory description, uint256 amount) external;
-
-    function setFarmPlot(address user, uint8 index, uint8 plotType) external;
-
-    function chargeNextCampaign(uint256 amount) external;
-
+    function plantAtFarmPlot(address user, uint8 index, uint8 plantType) external;
+    function grantRiceSeed(address user, uint256 riceCost) external;
+    function harvestFarmPlot(address user, uint8 index) external;
+    function getPlantSupply(address user) external view returns (uint8[3] memory);
     function getNextCampaign() external view returns (Campaign memory);
-
     function getFarmPlots(address user) external view returns (FarmPlot[] memory);
-
-    function getRiceSupply(address user) external view returns (uint256);
-
-    function setRiceSupply(address user, uint256 amount) external;
 }
