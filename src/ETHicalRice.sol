@@ -68,7 +68,7 @@ contract ETHicalRice is IETHicalRice {
     function harvestFarmPlot(address user, uint8 index) external onlyOwner {
         uint256 time = farmPlotTimes[user][index];
         uint8 plantType = farmPlotPlantTypes[user][index];
-        uint256 growTime = plantType == 0 ? PLANT_GROWTH_TIME : RICE_GROWTH_TIME;
+        uint256 growTime = plantType != 2 ? PLANT_GROWTH_TIME : RICE_GROWTH_TIME;
         if (time + growTime > block.timestamp) revert FarmPlotNotReady();
         // Increase the plant count
         plantSupply[user][plantType]++;

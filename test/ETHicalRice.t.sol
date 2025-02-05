@@ -25,4 +25,14 @@ contract ETHicalRiceTest is Test {
         gameContract.plantAtFarmPlot(player, 1, 1);
         assertEq(gameContract.getFarmPlots(player)[1].plantType, 1);
     }
+
+    function test_harvestFarmPlot() public {
+        uint256 timestamp = block.timestamp;
+        uint8 TOMATO = 1;
+        gameContract.plantAtFarmPlot(player, 0, TOMATO);
+        vm.warp(timestamp + 60 * 60 + 1);
+        gameContract.harvestFarmPlot(player, 0);
+        uint8[3] memory plantSupply = gameContract.getPlantSupply(player);
+        assertEq(plantSupply[TOMATO], 1);
+    }
 }
