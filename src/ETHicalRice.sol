@@ -83,9 +83,9 @@ contract ETHicalRice is IETHicalRice {
         farmPlotPlantTypes[user][index] = 0;
     }
 
-    function reducePlantSupply(address user, uint8 plantType,uint8 amount) external onlyOwner {
+    function reducePlantSupply(address user, uint8 plantType, uint8 amount) external onlyOwner {
         if (plantSupply[user][plantType] < amount) revert NotEnoughSupply();
-        plantSupply[user][plantType]--;
+        plantSupply[user][plantType] -= amount;
     }
 
     function getPlantSupply(address user) external view returns (uint8[3] memory) {
