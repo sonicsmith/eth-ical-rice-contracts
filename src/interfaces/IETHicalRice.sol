@@ -30,5 +30,5 @@ interface IETHicalRice {
     function getPlantSupply(address user) external view returns (uint8[3] memory);
     function getNextCampaign() external view returns (Campaign memory);
     function getFarmPlots(address user) external view returns (FarmPlot[] memory);
-    function getRiceSupply(address user) external view returns (uint256);
+    function getRiceSeedCount(address user) external view returns (uint256);
 }
