@@ -118,4 +118,8 @@ contract ETHicalRice is IETHicalRice {
     function getScriptHash() external view returns (string memory) {
         return scriptHash;
     }
+
+    function getRiceSupply(address user) external view returns (uint256) {
+        return riceSeedCount[user];
+    }
 }
